@@ -117,6 +117,7 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .DS_Store
+backend/.vscode/
 *.suo
 *.ntvs*
 *.njsproj
