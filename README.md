@@ -1,5 +1,8 @@
 # KindoTest Project
 
+## WIKI
+   WIKI Page[https://github.com/peterhashair/kindoTest/wiki]
+
 ## Getting Started
 
 1. **Copy the example environment file:**
