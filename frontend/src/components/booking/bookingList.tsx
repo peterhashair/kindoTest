@@ -78,7 +78,9 @@ export const BookingList = () => {
                   disabled={booking.status !== "pending"}
                   className="w-full justify-center rounded-md bg-blue-500 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-400 disabled:bg-gray-500 disabled:cursor-not-allowed"
                 >
-                  pay now
+                  {booking.status !== "pending"
+                    ? "no payment required"
+                    : "pay now"}
                 </button>
               </div>
             </div>

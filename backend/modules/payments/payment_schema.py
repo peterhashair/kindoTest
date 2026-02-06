@@ -1,7 +1,8 @@
 import uuid
-from sqlalchemy import Column, String, TIMESTAMP, ForeignKey
+from sqlalchemy import Column, String, TIMESTAMP, ForeignKey, func
 from sqlalchemy.dialects.postgresql import UUID
 from config.database import Base
+
 
 class Payment(Base):
     __tablename__ = "payments"
@@ -10,5 +11,12 @@ class Payment(Base):
     status = Column(String, nullable=False)
     transaction_id = Column(String, nullable=True)
     error_message = Column(String, nullable=True)
-    created_at = Column(TIMESTAMP(timezone=True), server_default='now()', nullable=False)
-    updated_at = Column(TIMESTAMP(timezone=True), server_default='now()', onupdate='now()', nullable=False)
+    created_at = Column(
+        TIMESTAMP(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )

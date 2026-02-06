@@ -12,11 +12,7 @@ from modules.parents.parent_seeder import seed_data as seed_parent_data
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from middlewares.exception_handlers import (
-    http_exception_handler,
-    request_validation_exception_handler,
-    generic_exception_handler,
-)
+
 
 origins = [
     "http://localhost",
@@ -32,7 +28,6 @@ booking_schema.Base.metadata.create_all(bind=engine)
 payment_schema.Base.metadata.create_all(bind=engine)
 
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # on startup
@@ -41,13 +36,8 @@ async def lifespan(app: FastAPI):
     yield
     # on shutdown
 
+
 app = FastAPI(lifespan=lifespan)
-
-app.add_exception_handler(StarletteHTTPException, http_exception_handler)
-app.add_exception_handler(RequestValidationError, request_validation_exception_handler)
-# Note: It's good practice to keep the generic exception handler last
-app.add_exception_handler(Exception, generic_exception_handler)
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -56,6 +46,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+from fastapi.responses import JSONResponse
+from config.response import APIResponse
+from fastapi.exceptions import RequestValidationError
+
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_exception_handler(request, exc):
+    # Extract error messages from exc.errors()
+    errors = exc.errors()
+    # Get the first error message, or join all messages if multiple
+    error_msgs = [err.get("msg", str(err)) for err in errors]
+    error_msg = "; ".join(error_msgs)
+    return JSONResponse(
+        status_code=400,
+        content=APIResponse(status="error", data=None, error=error_msg).model_dump(),
+    )
 
 
 # Include the all the routers here

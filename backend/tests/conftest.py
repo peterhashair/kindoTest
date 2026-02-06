@@ -10,14 +10,17 @@ from main import app
 import os
 import json
 import sqlite3
+
 # Import schemas for seeding
 from modules.parents.parent_schema import Parent
 from modules.schools.school_schema import School
 from modules.students.student_schema import Student
 from modules.trips.trip_schema import Trip
+from modules.booking.booking_schema import Booking
 
 # --- Teach sqlite3 how to handle UUIDs for database queries ---
 sqlite3.register_adapter(uuid.UUID, str)
+
 
 # This is the definitive fix for the StatementError
 # --- Monkey-patch for UUID serialization in JSON responses ---
@@ -27,6 +30,7 @@ class UUIDEncoder(json.JSONEncoder):
             # if the obj is uuid, we simply return the value of uuid
             return str(obj)
         return super().default(obj)
+
 
 class CustomJSONResponse(JSONResponse):
     def render(self, content: any) -> bytes:
@@ -39,9 +43,9 @@ class CustomJSONResponse(JSONResponse):
             cls=UUIDEncoder,
         ).encode("utf-8")
 
+
 app.default_response_class = CustomJSONResponse
 # --- End monkey-patch ---
-
 
 
 # Use an in-memory SQLite database for testing
@@ -53,6 +57,7 @@ engine = create_engine(
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
 # Fixture to override the get_db dependency
 def override_get_db():
     try:
@@ -61,29 +66,35 @@ def override_get_db():
     finally:
         db.close()
 
+
 # Apply the override
 app.dependency_overrides[get_db] = override_get_db
+
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_db():
     # Create the database tables before any tests run
     Base.metadata.create_all(bind=engine)
-    
+
     # Seed the database with test data
     db = TestingSessionLocal()
-    
+
     # Add a school for tests to use
     test_school = School(name="Test Academy", id=uuid.uuid4())
     db.add(test_school)
-    
-    test_parent = Parent(name="Test Parent", email="testparent@example.com", id=uuid.uuid4())
+
+    test_parent = Parent(
+        name="Test Parent", email=str(uuid.uuid4()) + "@example.com", id=uuid.uuid4()
+    )
     db.add(test_parent)
-    
+
     # add a student associated with the parent and the school
     test_student = Student(name="Test Student", gender="male", dob=date(2010, 1, 1))
     test_student.parents.append(test_parent)
+
     db.add(test_student)
-    
+    db.flush()  # Flush to get the student ID for the booking
+
     # add a trip associated with the school
     test_trip = Trip(
         name="Test Trip",
@@ -93,23 +104,51 @@ def setup_test_db():
         start_date=date(2030, 1, 1),
         end_date=date(2030, 1, 2),
         school_id=test_school.id,
-        published=True
+        published=True,
     )
     db.add(test_trip)
-    
+    db.flush()
+
+    test_booking = Booking(
+        description="Test Booking",
+        trip_id=test_trip.id,
+        student_id=test_student.id,
+        parent_id=test_parent.id,
+        total_in_cents=test_trip.price_in_cents,
+        status="pending",
+    )
+
+    db.add(test_booking)
+
     db.commit()
     db.close()
 
     yield
-    
+
     # Teardown: remove the test database file after all tests in the session are done
     if os.path.exists("test.db"):
         os.remove("test.db")
+
+
+@pytest.fixture(scope="session")
+def test_data():
+    db = TestingSessionLocal()
+    school = db.query(School).first()
+    parent = db.query(Parent).first()
+    student = db.query(Student).first()
+    trip = db.query(Trip).first()
+    booking = db.query(Booking).first()
+    db.close()
+    return {
+        "school": school,
+        "parent": parent,
+        "student": student,
+        "trip": trip,
+        "booking": booking,
+    }
 
 
 @pytest.fixture(scope="function")
 def client():
     with TestClient(app) as c:
         yield c
-
-

@@ -1,12 +1,12 @@
 from fastapi.testclient import TestClient
 import uuid
 
+
 # We need to create a trip first to be able to create a booking
 def test_create_booking(client: TestClient):
     # 1. Get existing trips, parent, and student from the test DB setup
     trip_response = client.get("/trips")
     trip_id = trip_response.json()["data"][0]["id"]
-
 
     parent_response = client.get("/parents")
     parent_id = parent_response.json()["data"][0]["id"]
@@ -19,12 +19,12 @@ def test_create_booking(client: TestClient):
         "description": "Museum Visit",
         "trip_id": trip_id,
         "student_id": student_id,
-        "parent_id": parent_id
+        "parent_id": parent_id,
     }
 
     create_response = client.post("/bookings/", json=booking_data)
     assert create_response.status_code == 200
-    
+
     booking = create_response.json()["data"]
 
     assert "id" in booking
@@ -34,8 +34,6 @@ def test_create_booking(client: TestClient):
     assert retry_response.status_code == 200
     retry_booking = retry_response.json()["data"]
     assert retry_booking["id"] == booking["id"]
-
-
 
     # 4. Test get bookings by parent ID
     get_by_parent_response = client.get(f"/bookings/parent/{parent_id}")
