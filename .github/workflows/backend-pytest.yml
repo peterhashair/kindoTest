@@ -42,4 +42,4 @@ jobs:
           pip install -r backend/requirements.txt
       - name: Run pytest
         run: |
-          pytest backend/modules/tests
+          pytest backend/tests
