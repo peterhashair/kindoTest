@@ -9,16 +9,34 @@ from modules.booking import booking_schema, booking_routes
 from modules.payments import payment_routes, payment_schema
 from modules.schools.school_seeder import seed_data as seed_school_data
 from modules.parents.parent_seeder import seed_data as seed_parent_data
+from modules.trips.trip_seeder import seed_data as seed_trip_data
+from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+import os
+import json
 
 
-origins = [
-    "http://localhost",
-    "http://localhost:5173",
-    "http://localhost:3000",
-]
+
+load_dotenv()
+
+
+# Read CORS origins from environment variable, fallback to default
+origins_env = os.getenv("CORS_ORIGINS")
+if origins_env:
+    try:
+        origins = json.loads(origins_env)
+        if not isinstance(origins, list):
+            origins = [origins]
+    except Exception:
+        origins = [origins_env]
+else:
+    origins = [
+        "http://localhost",
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ]
 # This will create all the tables defined by your models
 school_schema.Base.metadata.create_all(bind=engine)
 trip_schema.Base.metadata.create_all(bind=engine)
@@ -33,6 +51,7 @@ async def lifespan(app: FastAPI):
     # on startup
     seed_school_data()
     seed_parent_data()
+    seed_trip_data()
     yield
     # on shutdown
 
