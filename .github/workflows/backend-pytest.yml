@@ -1,0 +1,45 @@
+name: Backend Pytest
+
+on:
+  push:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-pytest.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-pytest.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: kindotest
+          POSTGRES_USER: kindo
+          POSTGRES_PASSWORD: kindopass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kindo -d kindotest" --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      DATABASE_URL: postgresql://kindo:kindopass@localhost:5432/kindotest
+      CORS_ORIGINS: '["http://localhost:3000","http://localhost:5173"]'
+      POSTGRES_USER: kindo
+      POSTGRES_PASSWORD: kindopass
+      POSTGRES_DB: kindotest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+      - name: Run pytest
+        run: |
+          pytest backend/modules/tests
