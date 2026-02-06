@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"  # Edge port
+      - "4510-4559:4510-4559"
+    environment:
+      - SERVICES=ec2,ecs,iam,cloudformation,sts,logs,apigateway,s3,ssm,secretsmanager,rds,elbv2
+      - DEBUG=1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - CDK_DEPLOY_REGION=us-east-1
+      - CDK_DEPLOY_ACCOUNT=000000000000
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./infra/localstack-data:/var/lib/localstack"
