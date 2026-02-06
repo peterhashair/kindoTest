@@ -10,6 +10,10 @@ on:
       - 'backend/**'
       - '.github/workflows/backend-pytest.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true 
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -24,7 +28,7 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd "pg_isready -U kindo -d kindotest" --health-interval 10s --health-timeout 5s --health-retries 5
-             
+
     env:
       DATABASE_URL: postgresql://kindo:kindopass@localhost:5432/kindotest
       CORS_ORIGINS: '["http://localhost:3000","http://localhost:5173"]'

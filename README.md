@@ -6,6 +6,11 @@
 
    ```sh
    cp .env.example .env
+
+   ## More Information
+
+   For detailed documentation and advanced usage, see the [project wiki](../../wiki).
+
    ```
 
 2. **Build and start all services with Docker Compose:**
