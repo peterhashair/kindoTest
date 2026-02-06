@@ -13,17 +13,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_DB: kindotest
-          POSTGRES_USER: kindo
-          POSTGRES_PASSWORD: kindopass
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U kindo -d kindotest" --health-interval 10s --health-timeout 5s --health-retries 5
     env:
       DATABASE_URL: postgresql://kindo:kindopass@localhost:5432/kindotest
       CORS_ORIGINS: '["http://localhost:3000","http://localhost:5173"]'
@@ -42,4 +31,5 @@ jobs:
           pip install -r backend/requirements.txt
       - name: Run pytest
         run: |
+          export PYTHONPATH=backend
           pytest backend/tests
