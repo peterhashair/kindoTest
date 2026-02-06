@@ -1,4 +1,9 @@
 # KindoTest Project
+## Demo video 
+[screen-capture (1).webm](https://github.com/user-attachments/assets/f18205b7-24c5-46b2-96b6-bf8f8ea77d35)
+
+
+   
 
 ## WIKI
    WIKI Page[https://github.com/peterhashair/kindoTest/wiki]
