@@ -132,7 +132,7 @@ def update_booking(
 ) -> booking_schema.Booking:
     booking = _get_booking_by_id(db, booking_id)
 
-    for key, value in booking_data.dict(exclude_unset=True).items():
+    for key, value in booking_data.model_dump(exclude_unset=True).items():
         setattr(booking, key, value)
 
     db.commit()

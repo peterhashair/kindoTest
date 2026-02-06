@@ -52,7 +52,7 @@ def update_student(
     if not student:
         raise ExceptionError("Student not found", status_code=404)
 
-    for key, value in student_data.dict(exclude_unset=True).items():
+    for key, value in student_data.model_dump(exclude_unset=True).items():
         setattr(student, key, value)
 
     db.commit()

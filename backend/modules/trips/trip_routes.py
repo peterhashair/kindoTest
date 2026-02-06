@@ -34,7 +34,7 @@ def get_trips(db: Session = Depends(get_db)):
     except (ValueError, ExceptionError) as e:
         return JSONResponse(
             status_code=e.status_code,
-            content=APIResponse(status="error", data=None, error=e.detail).dict(),
+            content=APIResponse(status="error", data=None, error=e.detail).model_dump(),
         )
 
 
@@ -53,7 +53,7 @@ def get_trip_byId(trip_id: str, db: Session = Depends(get_db)):
                 status="error",
                 data=None,
                 error="Invalid trip ID format. Must be a valid UUID.",
-            ).dict(),
+            ).model_dump(),
         )
 
     trip = get_trip_byId_service(db, trip_id)
@@ -62,7 +62,7 @@ def get_trip_byId(trip_id: str, db: Session = Depends(get_db)):
             status_code=404,
             content=APIResponse(
                 status="error", data=None, error="Trip not found"
-            ).dict(),
+            ).model_dump(),
         )
 
     return APIResponse(status="success", data=trip, error="")
@@ -76,5 +76,5 @@ def create_trip(trip: trip_model.TripCreate, db: Session = Depends(get_db)):
     except (ValueError, ExceptionError) as e:
         return JSONResponse(
             status_code=422,
-            content=APIResponse(status="error", data=None, error=str(e)).dict(),
+            content=APIResponse(status="error", data=None, error=str(e)).model_dump(),
         )
